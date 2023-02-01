@@ -10,12 +10,17 @@ package toni
 
 import cats.effect.{ExitCode, IO}
 import cats.syntax.all.*
+import com.comcast.ip4s.{ipv4, port}
 import com.monovore.decline.Opts
 import com.monovore.decline.effect.CommandIOApp
 import org.http4s.Uri
+import org.http4s.ember.server.EmberServerBuilder
+import org.http4s.server.middleware.CORS
+import org.typelevel.log4cats.Logger
+import org.typelevel.log4cats.slf4j.Slf4jFactory
 
 //https://toniogela.dev/http4s-on-fly-io/
-object Server extends CommandIOApp("helloServer", "Greets you in HTML") {
+object TServer extends CommandIOApp("helloServer", "Greets you in HTML") {
 
   val titleOpt: Opts[String] =
     Opts.env[String]("TITLE", "Page title").withDefault("Hello")
@@ -31,7 +36,24 @@ object Server extends CommandIOApp("helloServer", "Greets you in HTML") {
         .toValidatedNel
     )
 
+  import org.typelevel.log4cats.slf4j.loggerFactoryforSync
   def main: Opts[IO[ExitCode]] = (baseUrlOpt, titleOpt).mapN((baseUrl, title) =>
-    IO.println(s"$baseUrl $title").as(ExitCode.Success)
+    for {
+      given Logger[IO] <- Slf4jFactory.create[IO]
+      exitCode <- EmberServerBuilder
+        .default[IO]
+        .withHttp2
+        .withHost(ipv4"0.0.0.0")
+        .withPort(port"8080")
+        .withHttpApp(
+          CORS.policy.withAllowOriginAll(TRoutes.routes[IO](baseUrl, title)).orNotFound
+        )
+        .build
+        .useForever
+        .as(ExitCode.Success)
+    } yield exitCode
   )
+  
+  
+  
 }
