@@ -1,8 +1,11 @@
 //> using scala "3.2.1"
+//> using resourceDir "."
+//> using packaging.packageType "assembly"
 //> using lib "org.http4s::http4s-ember-server::0.23.18"
 //> using lib "org.http4s::http4s-dsl::0.23.18"
 //> using lib "com.monovore::decline-effect::2.4.1"
 //> using lib "ch.qos.logback:logback-classic:1.4.5"
+//> using mainClass "toni.TServer"
 
 
 package toni
@@ -18,6 +21,7 @@ import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.middleware.CORS
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jFactory
+import org.typelevel.log4cats.slf4j.loggerFactoryforSync
 
 //https://toniogela.dev/http4s-on-fly-io/
 object TServer extends CommandIOApp("helloServer", "Greets you in HTML") {
@@ -36,7 +40,8 @@ object TServer extends CommandIOApp("helloServer", "Greets you in HTML") {
         .toValidatedNel
     )
 
-  import org.typelevel.log4cats.slf4j.loggerFactoryforSync
+  //BASE_URL="https://toniogela.dev" scala-cli run TServer.scala   //-> localhost:8080/foo   ....zum Webserver API testen mit json Daten siehe https://reqbin.com/
+  //BASE_URL="https://toniogela.dev" scala-cli run .    ->genügt, wenn nur eine Möglichkeit auf Pfad..??
   def main: Opts[IO[ExitCode]] = (baseUrlOpt, titleOpt).mapN((baseUrl, title) =>
     for {
       given Logger[IO] <- Slf4jFactory.create[IO]
