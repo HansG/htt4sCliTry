@@ -20,7 +20,7 @@ object TRoutes {
     HttpRoutes.of[F] {
       case GET -> Root / "health" => Response[F](Status.Ok).pure[F]
       case GET -> path =>
-        Logger[F].info(s"Serving $path") >>
+        Logger[F].info(s"HG Serving $path") >>
         Response[F](Status.Ok)
           .withEntity(page(baseUrl.withPath(baseUrl.path.merge(path)), title))
           .withContentType(`Content-Type`(MediaType.text.html))

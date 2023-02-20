@@ -3,7 +3,7 @@ val Http4sVersion = "0.23.18"
 lazy val root = (project in file("."))
   .settings(
     organization := "com.example",
-    name := "run",
+    name := "http4sCliTry",
     version := "0.0.1-SNAPSHOT",
     scalaVersion := "3.2.1",
     libraryDependencies ++= Seq(
